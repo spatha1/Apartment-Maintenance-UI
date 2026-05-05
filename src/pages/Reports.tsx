@@ -101,6 +101,13 @@ export default function Reports() {
 
   const monthlyReports: ReportDef[] = mid ? [
     {
+      icon: FileText, color: 'text-purple-600', bg: 'bg-purple-50',
+      title: 'Full Maintenance Sheet',
+      desc: 'Complete month snapshot — summary, water readings, expenses. Use as backup.',
+      pdfPath: `/months/${mid}/report/sheet`,
+      pdfFile: `maintenance-sheet.pdf`,
+    },
+    {
       icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-50',
       title: 'Payment Collection',
       desc: 'All flats — amounts, status, carried-forward, paid by, references',
