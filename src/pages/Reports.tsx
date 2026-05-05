@@ -27,15 +27,24 @@ export default function Reports() {
     })
   }, [])
 
+  const isMobile = window.innerWidth < 768
+
   async function viewPdf(path: string, title: string) {
     setBusy(title + '-view')
     try {
       const res = await fetchWithAuth(path)
       if (!res.ok) throw new Error(await res.text())
       const blob = await res.blob()
-      if (previewUrl) URL.revokeObjectURL(previewUrl)
-      setPreviewUrl(URL.createObjectURL(blob))
-      setPreviewTitle(title)
+      const url = URL.createObjectURL(blob)
+      if (isMobile) {
+        // iframe doesn't work on mobile — open in new tab/PDF viewer
+        window.open(url, '_blank')
+        setTimeout(() => URL.revokeObjectURL(url), 10000)
+      } else {
+        if (previewUrl) URL.revokeObjectURL(previewUrl)
+        setPreviewUrl(url)
+        setPreviewTitle(title)
+      }
     } catch { alert('Failed to load PDF') }
     finally { setBusy(null) }
   }
