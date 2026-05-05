@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Building2, LayoutDashboard, Receipt, Droplets,
-  BarChart3, LogOut, User, Download, Settings2, Info,
+  BarChart3, LogOut, User, Download, Settings2, Info, IndianRupee,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
@@ -21,6 +21,10 @@ export default function Layout({ children, monthId }: Props) {
     await logout()
     navigate('/login')
   }
+
+  const residentLinks = user?.role !== 'admin' ? [
+    { to: '/my-bill', icon: IndianRupee, label: 'My Bill', end: false },
+  ] : []
 
   const commonLinks = [
     { to: '/information', icon: Info, label: 'Information', end: false },
@@ -65,6 +69,12 @@ export default function Layout({ children, monthId }: Props) {
                 {label}
               </NavLink>
             ))}
+            {residentLinks.map(({ to, icon: Icon, label, end }) => (
+              <NavLink key={to} to={to} end={end} className={navLinkClass}>
+                <Icon size={15} />
+                {label}
+              </NavLink>
+            ))}
             {commonLinks.map(({ to, icon: Icon, label, end }) => (
               <NavLink key={to} to={to} end={end} className={navLinkClass}>
                 <Icon size={15} />
@@ -101,6 +111,12 @@ export default function Layout({ children, monthId }: Props) {
         <nav className="sm:hidden border-t border-gray-100 overflow-x-auto">
           <div className="flex items-center gap-1 px-3 py-2 min-w-max">
             {user?.role === 'admin' && adminLinks.map(({ to, icon: Icon, label, end }) => (
+              <NavLink key={to} to={to} end={end} className={navLinkClass}>
+                <Icon size={14} />
+                <span className="text-xs">{label}</span>
+              </NavLink>
+            ))}
+            {residentLinks.map(({ to, icon: Icon, label, end }) => (
               <NavLink key={to} to={to} end={end} className={navLinkClass}>
                 <Icon size={14} />
                 <span className="text-xs">{label}</span>
