@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Building2, LayoutDashboard, Receipt, Droplets,
-  BarChart3, LogOut, User, Download, Settings2,
+  BarChart3, LogOut, User, Download, Settings2, Info,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
@@ -21,6 +21,10 @@ export default function Layout({ children, monthId }: Props) {
     await logout()
     navigate('/login')
   }
+
+  const commonLinks = [
+    { to: '/information', icon: Info, label: 'Information', end: false },
+  ]
 
   const adminLinks = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard', end: true },
@@ -54,16 +58,20 @@ export default function Layout({ children, monthId }: Props) {
           </div>
 
           {/* Desktop nav — hidden on mobile */}
-          {user?.role === 'admin' && (
-            <nav className="hidden sm:flex items-center gap-1 overflow-x-auto">
-              {adminLinks.map(({ to, icon: Icon, label, end }) => (
-                <NavLink key={to} to={to} end={end} className={navLinkClass}>
-                  <Icon size={15} />
-                  {label}
-                </NavLink>
-              ))}
-            </nav>
-          )}
+          <nav className="hidden sm:flex items-center gap-1 overflow-x-auto">
+            {user?.role === 'admin' && adminLinks.map(({ to, icon: Icon, label, end }) => (
+              <NavLink key={to} to={to} end={end} className={navLinkClass}>
+                <Icon size={15} />
+                {label}
+              </NavLink>
+            ))}
+            {commonLinks.map(({ to, icon: Icon, label, end }) => (
+              <NavLink key={to} to={to} end={end} className={navLinkClass}>
+                <Icon size={15} />
+                {label}
+              </NavLink>
+            ))}
+          </nav>
 
           {/* User info + logout */}
           <div className="flex items-center gap-2 shrink-0">
@@ -90,18 +98,22 @@ export default function Layout({ children, monthId }: Props) {
         </div>
 
         {/* Mobile nav — scrollable row, visible only on small screens */}
-        {user?.role === 'admin' && (
-          <nav className="sm:hidden border-t border-gray-100 overflow-x-auto">
-            <div className="flex items-center gap-1 px-3 py-2 min-w-max">
-              {adminLinks.map(({ to, icon: Icon, label, end }) => (
-                <NavLink key={to} to={to} end={end} className={navLinkClass}>
-                  <Icon size={14} />
-                  <span className="text-xs">{label}</span>
-                </NavLink>
-              ))}
-            </div>
-          </nav>
-        )}
+        <nav className="sm:hidden border-t border-gray-100 overflow-x-auto">
+          <div className="flex items-center gap-1 px-3 py-2 min-w-max">
+            {user?.role === 'admin' && adminLinks.map(({ to, icon: Icon, label, end }) => (
+              <NavLink key={to} to={to} end={end} className={navLinkClass}>
+                <Icon size={14} />
+                <span className="text-xs">{label}</span>
+              </NavLink>
+            ))}
+            {commonLinks.map(({ to, icon: Icon, label, end }) => (
+              <NavLink key={to} to={to} end={end} className={navLinkClass}>
+                <Icon size={14} />
+                <span className="text-xs">{label}</span>
+              </NavLink>
+            ))}
+          </div>
+        </nav>
       </header>
 
       {/* Page content */}

@@ -53,4 +53,8 @@ async function postForm<T>(path: string, formData: FormData): Promise<T> {
   return res.json()
 }
 
-export const api = { get, post, put, postForm }
+function del<T>(path: string) {
+  return request<T>(path, { method: 'DELETE' })
+}
+
+export const api = { get, post, put, postForm, delete: del }

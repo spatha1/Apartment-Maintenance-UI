@@ -87,3 +87,10 @@ export interface FlatsData {
   shops: string[]
   shop_charges: Record<string, number>
 }
+
+export interface Notice {
+  id: number
+  content: string
+  created_at: string
+  created_by: string
+}

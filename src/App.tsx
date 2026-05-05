@@ -10,6 +10,7 @@ import MyBill from './pages/MyBill'
 import Payment from './pages/Payment'
 import Settings from './pages/Settings'
 import Reports from './pages/Reports'
+import Information from './pages/Information'
 
 function RootRedirect() {
   const { user, loading } = useAuth()
@@ -68,6 +69,12 @@ export default function App() {
           <Route path="/my-bill" element={
             <ProtectedRoute>
               <MyBill />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/information" element={
+            <ProtectedRoute>
+              <Information />
             </ProtectedRoute>
           } />
 
