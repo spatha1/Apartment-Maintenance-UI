@@ -1,4 +1,5 @@
 const BASE = import.meta.env.VITE_API_BASE_URL ?? '/api'
+const STATIC_ORIGIN = BASE.replace(/\/api$/, '')
 
 function authHeader(): HeadersInit {
   const token = localStorage.getItem('auth_token')
@@ -58,3 +59,8 @@ function del<T>(path: string) {
 }
 
 export const api = { get, post, put, postForm, delete: del }
+
+export function staticUrl(path: string): string {
+  if (!path || path.startsWith('http')) return path
+  return STATIC_ORIGIN + path
+}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Settings2, Upload, CheckCircle2, AlertCircle } from 'lucide-react'
 import Layout from '../components/Layout'
-import { api } from '../api/client'
+import { api, staticUrl } from '../api/client'
 
 export default function Settings() {
   const [qrUrl, setQrUrl] = useState('/static/images/upi-qr.svg')
@@ -59,7 +59,7 @@ export default function Settings() {
           <div className="flex justify-center mb-5">
             <div className="border-2 border-dashed border-gray-200 rounded-xl p-4">
               <img
-                src={qrUrl}
+                src={staticUrl(qrUrl)}
                 alt="Current QR"
                 className="w-48 h-48 object-contain"
               />
