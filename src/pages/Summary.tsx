@@ -117,8 +117,25 @@ export default function Summary() {
   const grandTotal = rows.reduce((s, r) => s + r.grand_total, 0)
   const isLocked = month?.is_locked ?? false
 
+  async function confirmPayment(flat_no: string) {
+    const row = rows.find(r => r.flat_no === flat_no)
+    if (!row) return
+    try {
+      const updated = await api.post<SummaryRow>(`/months/${mid}/mark-paid`, {
+        flat_no,
+        payment_reference: row.payment_reference ?? '',
+        paid_by: row.paid_by ?? '',
+        paid_amount: row.grand_total,
+      })
+      setRows(prev => prev.map(r => r.flat_no === flat_no ? updated : r))
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed')
+    }
+  }
+
   function statusBadge(row: SummaryRow) {
     if (row.status === 'Paid') return <span className="badge-paid"><CheckCircle2 size={11} /> Paid</span>
+    if (row.status === 'Pending Verification') return <span className="text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1 w-fit" style={{background:'#ede9fe',color:'#6d28d9'}}><Clock size={11} /> Verify</span>
     if (row.status === 'Partial') return <span className="badge-pending" style={{background:'#fef3c7',color:'#92400e'}}><AlertTriangle size={11} /> Partial</span>
     return <span className="badge-pending"><Clock size={11} /> Pending</span>
   }
@@ -270,6 +287,15 @@ export default function Summary() {
                               <button onClick={() => unmarkPaid(row.flat_no)} className="btn btn-secondary btn-sm">
                                 <CreditCard size={12} /> Unpay
                               </button>
+                            ) : row.status === 'Pending Verification' ? (
+                              <>
+                                <button onClick={() => confirmPayment(row.flat_no)} className="btn btn-success btn-sm">
+                                  <CheckCircle2 size={12} /> Confirm
+                                </button>
+                                <button onClick={() => unmarkPaid(row.flat_no)} className="btn btn-secondary btn-sm">
+                                  <X size={12} /> Reject
+                                </button>
+                              </>
                             ) : (
                               <button onClick={() => { setPayFlat(row.flat_no); setPayRef(''); setPayBy(''); setPayAmount('') }} className="btn btn-success btn-sm">
                                 <CreditCard size={12} /> Mark Paid

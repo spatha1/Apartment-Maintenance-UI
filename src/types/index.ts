@@ -58,7 +58,7 @@ export interface SummaryRow {
   carried_forward: number
   grand_total: number
   paid_amount: number
-  status: 'Paid' | 'Partial' | 'Pending'
+  status: 'Paid' | 'Partial' | 'Pending' | 'Pending Verification'
   paid_date: string | null
   payment_reference: string | null
   paid_by: string | null

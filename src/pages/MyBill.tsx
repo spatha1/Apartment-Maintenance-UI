@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Building2, CheckCircle2, Clock, QrCode, IndianRupee,
-  Droplets, Receipt, ChevronDown, AlertTriangle, ChevronUp,
+  Droplets, Receipt, ChevronDown, AlertTriangle, ChevronUp, Send,
 } from 'lucide-react'
 import Layout from '../components/Layout'
 import { api } from '../api/client'
-import type { MyBillData, WaterSource, WaterReading, ExpensesData } from '../types'
+import type { MyBillData, WaterSource, WaterReading, ExpensesData, SummaryRow } from '../types'
 
 export default function MyBill() {
   const navigate = useNavigate()
@@ -17,6 +17,10 @@ export default function MyBill() {
   const [expenses, setExpenses] = useState<ExpensesData | null>(null)
   const [waterSource, setWaterSource] = useState<WaterSource | null>(null)
   const [myReading, setMyReading] = useState<WaterReading | null>(null)
+  const [showPaidForm, setShowPaidForm] = useState(false)
+  const [paidRef, setPaidRef] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [paidError, setPaidError] = useState('')
 
   useEffect(() => {
     api.get<MyBillData>('/my-bill').then(d => {
@@ -45,6 +49,25 @@ export default function MyBill() {
         </div>
       </Layout>
     )
+  }
+
+  async function submitPaid() {
+    if (!selectedMonthId) return
+    setSubmitting(true)
+    setPaidError('')
+    try {
+      const updated = await api.post<SummaryRow>('/resident-paid', {
+        month_id: selectedMonthId,
+        payment_reference: paidRef.trim(),
+      })
+      setData(prev => prev ? { ...prev, bill: updated } : prev)
+      setShowPaidForm(false)
+      setPaidRef('')
+    } catch (err: unknown) {
+      setPaidError(err instanceof Error ? err.message : 'Failed to submit')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const { flat_no, months, month, bill } = data ?? {}
@@ -90,6 +113,10 @@ export default function MyBill() {
               }`}>
                 {bill.status === 'Paid' ? (
                   <span className="badge-paid text-sm px-3 py-1"><CheckCircle2 size={14} /> Paid</span>
+                ) : bill.status === 'Pending Verification' ? (
+                  <span className="text-sm px-3 py-1 rounded-full font-semibold flex items-center gap-1" style={{background:'#ede9fe',color:'#6d28d9'}}>
+                    <Clock size={14} /> Awaiting Confirmation
+                  </span>
                 ) : bill.status === 'Partial' ? (
                   <span className="badge-pending text-sm px-3 py-1" style={{background:'#fef3c7',color:'#92400e'}}>
                     <AlertTriangle size={14} /> Partial — ₹{bill.paid_amount.toFixed(0)} paid
@@ -138,15 +165,58 @@ export default function MyBill() {
                 )}
               </div>
 
-              {/* QR button */}
-              {bill.status !== 'Paid' && month && (
-                <div className="px-5 pb-5">
+              {/* QR + I've Paid buttons */}
+              {bill.status !== 'Paid' && bill.status !== 'Pending Verification' && month && (
+                <div className="px-5 pb-5 space-y-2">
                   <button
                     onClick={() => navigate(`/payment?month_id=${month.month_id}&flat_no=${flat_no}&amount=${bill.grand_total}`)}
                     className="btn-primary w-full justify-center"
                   >
                     <QrCode size={18} /> Pay via UPI — ₹{bill.grand_total.toFixed(0)}
                   </button>
+                  {!showPaidForm ? (
+                    <button
+                      onClick={() => setShowPaidForm(true)}
+                      className="w-full flex items-center justify-center gap-2 text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 py-2 rounded-lg transition-colors"
+                    >
+                      <Send size={14} /> I've Already Paid
+                    </button>
+                  ) : (
+                    <div className="border border-emerald-200 rounded-lg p-3 space-y-2 bg-emerald-50">
+                      <p className="text-xs text-emerald-700 font-medium">Enter your UPI transaction reference</p>
+                      <input
+                        type="text"
+                        value={paidRef}
+                        onChange={e => setPaidRef(e.target.value)}
+                        placeholder="UPI Ref / Transaction ID"
+                        className="input text-sm"
+                      />
+                      {paidError && <p className="text-xs text-red-600">{paidError}</p>}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={submitPaid}
+                          disabled={submitting}
+                          className="flex-1 bg-emerald-600 text-white text-sm py-1.5 rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                        >
+                          {submitting ? 'Submitting...' : 'Submit'}
+                        </button>
+                        <button
+                          onClick={() => { setShowPaidForm(false); setPaidRef(''); setPaidError('') }}
+                          className="flex-1 bg-white border border-gray-200 text-sm py-1.5 rounded-lg hover:bg-gray-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {bill.status === 'Pending Verification' && (
+                <div className="px-5 pb-5 text-center text-sm text-purple-600">
+                  Payment submitted. Admin will confirm shortly.
+                  {bill.payment_reference && (
+                    <p className="text-xs text-gray-400 mt-1">Ref: {bill.payment_reference}</p>
+                  )}
                 </div>
               )}
             </div>
