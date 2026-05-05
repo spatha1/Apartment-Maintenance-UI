@@ -23,12 +23,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   async function login(username: string, password: string) {
-    const u = await api.post<User>('/auth/login', { username, password })
+    const u = await api.post<User & { token?: string }>('/auth/login', { username, password })
+    if (u.token) localStorage.setItem('auth_token', u.token)
     setUser(u)
   }
 
   async function logout() {
     await api.post('/auth/logout')
+    localStorage.removeItem('auth_token')
     setUser(null)
   }
 
