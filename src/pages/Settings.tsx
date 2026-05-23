@@ -10,9 +10,29 @@ export default function Settings() {
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
+  const [mobile, setMobile] = useState('')
+  const [mobileSaving, setMobileSaving] = useState(false)
+  const [mobileSaved, setMobileSaved] = useState(false)
+
   useEffect(() => {
-    api.get<{ qr_url: string }>('/settings/qr').then(r => setQrUrl(r.qr_url))
+    api.get<{ qr_url: string; upi_mobile: string }>('/settings/qr').then(r => {
+      setQrUrl(r.qr_url)
+      setMobile(r.upi_mobile ?? '')
+    })
   }, [])
+
+  async function saveMobile() {
+    setMobileSaving(true)
+    try {
+      await api.post('/settings/mobile', { upi_mobile: mobile })
+      setMobileSaved(true)
+      setTimeout(() => setMobileSaved(false), 3000)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save mobile')
+    } finally {
+      setMobileSaving(false)
+    }
+  }
 
   async function uploadQR(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -90,6 +110,37 @@ export default function Settings() {
           <p className="text-xs text-gray-400 text-center mt-3">
             PNG, JPG or SVG — will replace the current QR immediately
           </p>
+        </div>
+
+        {/* Mobile number */}
+        <div className="card p-6 mt-5">
+          <h2 className="font-semibold text-gray-900 mb-1">UPI Mobile Number</h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Residents can copy this number on the payment page and pay via any UPI app.
+          </p>
+
+          <div className="flex gap-2">
+            <input
+              type="tel"
+              placeholder="e.g. 9876543210"
+              value={mobile}
+              onChange={e => setMobile(e.target.value)}
+              className="input flex-1"
+            />
+            <button
+              onClick={saveMobile}
+              disabled={mobileSaving}
+              className="btn-primary shrink-0"
+            >
+              {mobileSaving ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+
+          {mobileSaved && (
+            <div className="flex items-center gap-2 text-emerald-600 text-sm mt-3">
+              <CheckCircle2 size={15} /> Mobile number saved
+            </div>
+          )}
         </div>
       </div>
     </Layout>

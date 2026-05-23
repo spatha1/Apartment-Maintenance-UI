@@ -11,6 +11,7 @@ import Payment from './pages/Payment'
 import Settings from './pages/Settings'
 import Reports from './pages/Reports'
 import Information from './pages/Information'
+import Pool from './pages/Pool'
 
 function RootRedirect() {
   const { user, loading } = useAuth()
@@ -62,6 +63,11 @@ export default function App() {
           <Route path="/settings" element={
             <ProtectedRoute adminOnly>
               <Settings />
+            </ProtectedRoute>
+          } />
+          <Route path="/pool" element={
+            <ProtectedRoute adminOnly>
+              <Pool />
             </ProtectedRoute>
           } />
 

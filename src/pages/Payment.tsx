@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, IndianRupee, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, IndianRupee, CheckCircle2, Copy, Check } from 'lucide-react'
 import Layout from '../components/Layout'
 import { api } from '../api/client'
 import type { SummaryRow } from '../types'
@@ -14,14 +14,27 @@ export default function Payment() {
 
   const [row, setRow] = useState<SummaryRow | null>(null)
   const [qrUrl, setQrUrl] = useState('/static/images/upi-qr.svg')
+  const [mobile, setMobile] = useState('')
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    api.get<{ qr_url: string }>('/settings/qr').then(r => setQrUrl(r.qr_url))
+    api.get<{ qr_url: string; upi_mobile: string }>('/settings/qr').then(r => {
+      setQrUrl(r.qr_url)
+      setMobile(r.upi_mobile ?? '')
+    })
     if (monthId && flatNo) {
       api.get<SummaryRow[]>(`/months/${monthId}/summary`)
         .then(rows => setRow(rows.find(r => r.flat_no === flatNo) ?? null))
     }
   }, [monthId, flatNo])
+
+  function copyMobile() {
+    if (!mobile) return
+    navigator.clipboard.writeText(mobile).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   const displayAmount = row
     ? row.grand_total
@@ -69,9 +82,26 @@ export default function Payment() {
             />
           </div>
 
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-400 mb-4">
             Scan with any UPI app to pay
           </p>
+
+          {/* Mobile number with copy */}
+          {mobile && (
+            <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+              <div className="text-left">
+                <p className="text-xs text-gray-400 mb-0.5">Or pay to mobile number</p>
+                <p className="text-base font-semibold text-gray-900 tracking-wider">{mobile}</p>
+              </div>
+              <button
+                onClick={copyMobile}
+                className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors shrink-0"
+              >
+                {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </Layout>

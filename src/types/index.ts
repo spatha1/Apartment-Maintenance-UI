@@ -94,3 +94,18 @@ export interface Notice {
   created_at: string
   created_by: string
 }
+
+export interface PoolTransaction {
+  id: number
+  date: string
+  type: 'credit' | 'debit'
+  amount: number
+  description: string
+  reference: string | null
+  created_by: string | null
+}
+
+export interface PoolData {
+  balance: number
+  transactions: PoolTransaction[]
+}
