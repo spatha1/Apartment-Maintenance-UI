@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, IndianRupee, CheckCircle2, Copy, Check } from 'lucide-react'
 import Layout from '../components/Layout'
-import { api } from '../api/client'
+import { api, staticUrl } from '../api/client'
 import type { SummaryRow } from '../types'
 
 export default function Payment() {
@@ -76,7 +76,7 @@ export default function Payment() {
           {/* QR code */}
           <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 mb-4">
             <img
-              src={qrUrl}
+              src={staticUrl(qrUrl)}
               alt="UPI QR"
               className="w-56 h-56 mx-auto object-contain"
             />
