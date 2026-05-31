@@ -3,6 +3,7 @@ import {
   LayoutDashboard, Receipt, Droplets,
   BarChart3, LogOut, User, Download, Settings2, Info, IndianRupee, PiggyBank, ClipboardList,
 } from 'lucide-react'
+import BuildingLogo from './BuildingLogo'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -58,12 +59,7 @@ export default function Layout({ children, monthId }: Props) {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 font-bold text-gray-900 shrink-0">
-            <img
-              src="/building.jpg"
-              alt="Sai Nirmans Modulus"
-              className="w-8 h-8 rounded-lg object-cover shadow-sm"
-              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-            />
+            <BuildingLogo className="w-8 h-8 rounded-lg" />
             <div className="leading-tight">
               <span className="hidden sm:block text-sm font-bold text-gray-800">Sai Nirmans</span>
               <span className="hidden sm:block text-xs font-extrabold text-red-600 tracking-wide uppercase">Modulus</span>
