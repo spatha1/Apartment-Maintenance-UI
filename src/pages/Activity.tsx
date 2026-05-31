@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   CheckCircle2, Circle, Calendar, IndianRupee, CreditCard,
   Banknote, Plus, Pencil, Trash2, ClipboardList, TrendingDown, TrendingUp,
-  ChevronDown,
+  ChevronDown, RefreshCw,
 } from 'lucide-react'
 import Layout from '../components/Layout'
 import { api } from '../api/client'
@@ -56,6 +56,7 @@ export default function Activity() {
   const [toggling, setToggling] = useState<number | null>(null)
   const [editForm, setEditForm] = useState<EditState | null>(null)
   const [saving, setSaving] = useState(false)
+  const [seeding, setSeeding] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -66,9 +67,9 @@ export default function Activity() {
   }, [])
 
   useEffect(() => {
-    if (!monthId) return
     setLoading(true)
-    api.get<Activity[]>(`/activities?month_id=${monthId}`)
+    const qs = monthId ? `?month_id=${monthId}` : ''
+    api.get<Activity[]>(`/activities${qs}`)
       .then(setActivities)
       .catch(() => setActivities([]))
       .finally(() => setLoading(false))
@@ -84,6 +85,25 @@ export default function Activity() {
       setError('Failed to update')
     } finally {
       setToggling(null)
+    }
+  }
+
+  async function seedDefaults() {
+    setSeeding(true)
+    setError('')
+    try {
+      const res = await api.post<{seeded: number; message: string}>('/activities/seed-defaults', {})
+      if (res.seeded > 0) {
+        const qs = monthId ? `?month_id=${monthId}` : ''
+        const updated = await api.get<Activity[]>(`/activities${qs}`)
+        setActivities(updated)
+      } else {
+        setError(res.message)
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to seed')
+    } finally {
+      setSeeding(false)
     }
   }
 
@@ -142,12 +162,24 @@ export default function Activity() {
             <h1 className="text-2xl font-bold text-gray-900">Monthly Activities</h1>
           </div>
           {isAdmin && (
-            <button
-              onClick={() => setEditForm({ ...EMPTY_EDIT })}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-            >
-              <Plus size={15} /> Add Activity
-            </button>
+            <div className="flex items-center gap-2">
+              {activities.length === 0 && (
+                <button
+                  onClick={seedDefaults}
+                  disabled={seeding}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  <RefreshCw size={15} className={seeding ? 'animate-spin' : ''} />
+                  {seeding ? 'Seeding…' : 'Load Defaults'}
+                </button>
+              )}
+              <button
+                onClick={() => setEditForm({ ...EMPTY_EDIT })}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+              >
+                <Plus size={15} /> Add Activity
+              </button>
+            </div>
           )}
         </div>
 

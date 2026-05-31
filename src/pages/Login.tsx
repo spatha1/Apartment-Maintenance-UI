@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Building2, LogIn, AlertCircle } from 'lucide-react'
+import { LogIn, AlertCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Login() {
@@ -34,11 +34,24 @@ export default function Login() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 rounded-2xl shadow-lg mb-4">
-            <Building2 size={28} className="text-white" />
+          <div className="inline-block mb-4">
+            <img
+              src="/building.jpg"
+              alt="Sai Nirmans Modulus"
+              className="w-24 h-24 rounded-2xl object-cover shadow-lg mx-auto"
+              onError={e => {
+                const el = e.target as HTMLImageElement
+                el.style.display = 'none'
+                el.nextElementSibling?.classList.remove('hidden')
+              }}
+            />
+            <div className="hidden w-24 h-24 bg-blue-600 rounded-2xl shadow-lg mx-auto flex items-center justify-center">
+              <span className="text-white text-2xl font-black">SNM</span>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Apartment Maintenance</h1>
-          <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
+          <h1 className="text-xl font-bold text-gray-800">Sai Nirmans</h1>
+          <h2 className="text-2xl font-black text-red-600 tracking-widest uppercase">Modulus</h2>
+          <p className="text-gray-500 text-sm mt-1">Maintenance Management</p>
         </div>
 
         {/* Card */}

@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  Building2, LayoutDashboard, Receipt, Droplets,
+  LayoutDashboard, Receipt, Droplets,
   BarChart3, LogOut, User, Download, Settings2, Info, IndianRupee, PiggyBank, ClipboardList,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -58,9 +58,17 @@ export default function Layout({ children, monthId }: Props) {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 font-bold text-gray-900 shrink-0">
-            <Building2 size={20} className="text-blue-600" />
-            <span className="hidden sm:inline">Apartment Maintenance</span>
-            <span className="sm:hidden">AptMgmt</span>
+            <img
+              src="/building.jpg"
+              alt="Sai Nirmans Modulus"
+              className="w-8 h-8 rounded-lg object-cover shadow-sm"
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
+            <div className="leading-tight">
+              <span className="hidden sm:block text-sm font-bold text-gray-800">Sai Nirmans</span>
+              <span className="hidden sm:block text-xs font-extrabold text-red-600 tracking-wide uppercase">Modulus</span>
+              <span className="sm:hidden text-sm font-bold">SNM</span>
+            </div>
           </div>
 
           {/* Desktop nav — hidden on mobile */}
