@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   RefreshCw, CheckCircle2, Clock, Lock, QrCode,
-  CreditCard, AlertCircle, User, Download, AlertTriangle, Pencil, X, Save, Eraser,
+  CreditCard, AlertCircle, User, Download, AlertTriangle, Pencil, X, Save, Eraser, PiggyBank,
 } from 'lucide-react'
 import Layout from '../components/Layout'
 import { api } from '../api/client'
@@ -23,6 +23,8 @@ export default function Summary() {
   const [payBy, setPayBy] = useState('')
   const [payAmount, setPayAmount] = useState('')
   const [error, setError] = useState('')
+
+  const [poolAdded, setPoolAdded] = useState<Set<string>>(new Set())
 
   // Edit state
   const [editFlat, setEditFlat] = useState<string | null>(null)
@@ -95,6 +97,17 @@ export default function Summary() {
       setEditFlat(null)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Save failed')
+    }
+  }
+
+  async function addExcessToPool(flat_no: string) {
+    try {
+      const res = await api.post<{ excess: number }>(`/months/${mid}/excess-to-pool/${flat_no}`, {})
+      setPoolAdded(prev => new Set([...prev, flat_no]))
+      setError('')
+      alert(`₹${res.excess.toFixed(0)} excess from ${flat_no} added to Maintenance Pool!`)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to add excess to pool')
     }
   }
 
@@ -284,9 +297,23 @@ export default function Summary() {
                         ) : (
                           <>
                             {row.status === 'Paid' || row.status === 'Partial' ? (
+                              <>
+                              {row.status === 'Paid' && row.paid_amount > row.grand_total && !poolAdded.has(row.flat_no) && (
+                                <button
+                                  onClick={() => addExcessToPool(row.flat_no)}
+                                  className="btn btn-sm bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                                  title={`Add ₹${(row.paid_amount - row.grand_total).toFixed(0)} excess to Pool`}
+                                >
+                                  <PiggyBank size={12} /> +₹{(row.paid_amount - row.grand_total).toFixed(0)}→Pool
+                                </button>
+                              )}
+                              {poolAdded.has(row.flat_no) && (
+                                <span className="text-xs text-emerald-600 font-medium">✓ Added to Pool</span>
+                              )}
                               <button onClick={() => unmarkPaid(row.flat_no)} className="btn btn-secondary btn-sm">
                                 <CreditCard size={12} /> Unpay
                               </button>
+                              </>
                             ) : row.status === 'Pending Verification' ? (
                               <>
                                 <button onClick={() => confirmPayment(row.flat_no)} className="btn btn-success btn-sm">
