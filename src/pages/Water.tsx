@@ -123,6 +123,11 @@ export default function Water() {
     try {
       const s = await api.put<WaterSource>(`/months/${mid}/water-source`, sourceForm)
       setSource(s)
+      // Update total_liters in form to show the auto-computed value
+      setSourceForm(p => ({ ...p, total_liters: s.total_liters }))
+      // Reload readings so amounts reflect the new rate
+      const d = await api.get<WaterReadingsData>(`/months/${mid}/water-readings`)
+      setData(d)
       setSavedSource(true)
       setTimeout(() => setSavedSource(false), 2000)
     } catch (err: unknown) {
@@ -134,7 +139,12 @@ export default function Water() {
 
   const totalCost =
     sourceForm.tankers_count * sourceForm.tanker_price + sourceForm.other_water_cost
-  const ratePerLitre = sourceForm.total_liters > 0 ? totalCost / sourceForm.total_liters : 0
+  // Sum of liters from all saved meter readings
+  const readingsTotal = data
+    ? Object.values(data.readings).reduce((s, r) => s + Math.max(r.current_reading - r.previous_reading, 0), 0)
+    : 0
+  const effectiveLiters = sourceForm.total_liters > 0 ? sourceForm.total_liters : readingsTotal
+  const ratePerLitre = effectiveLiters > 0 ? totalCost / effectiveLiters : 0
 
   return (
     <Layout monthId={mid}>
@@ -162,10 +172,9 @@ export default function Water() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {([
-                ['tankers_count', 'Tanker Count', '0', 'number'],
-                ['tanker_price', 'Price/Tanker ₹', '0', 'number'],
-                ['other_water_cost', 'Manjeera/Other ₹', '0', 'number'],
-                ['total_liters', 'Total Litres', '0', 'number'],
+                ['tankers_count', 'Tanker Count', '0'],
+                ['tanker_price', 'Price/Tanker ₹', '0'],
+                ['other_water_cost', 'Manjeera/Other ₹', '0'],
               ] as const).map(([key, lbl, ph]) => (
                 <div key={key}>
                   <label className="label">{lbl}</label>
@@ -181,11 +190,43 @@ export default function Water() {
                   />
                 </div>
               ))}
+              <div>
+                <label className="label">Total Litres</label>
+                <input
+                  className="input"
+                  type="number"
+                  step="1"
+                  min="0"
+                  placeholder="0 = auto"
+                  value={sourceForm.total_liters || ''}
+                  onChange={e => setSourceForm(p => ({ ...p, total_liters: parseFloat(e.target.value) || 0 }))}
+                  disabled={isLocked}
+                />
+                {readingsTotal > 0 && (
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <span className="text-xs text-gray-400">From readings: {readingsTotal.toLocaleString()} L</span>
+                    {!isLocked && sourceForm.total_liters === 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setSourceForm(p => ({ ...p, total_liters: Math.round(readingsTotal) }))}
+                        className="text-xs text-blue-600 hover:underline font-medium"
+                      >
+                        ← Use
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="mt-3 flex items-center justify-between">
               <div className="text-sm text-gray-500">
                 Total: <span className="font-semibold text-gray-900">₹{totalCost.toFixed(2)}</span>
-                {' · '}Rate: <span className="font-semibold text-blue-600">₹{ratePerLitre.toFixed(4)}/L</span>
+                {' · '}Rate: <span className={`font-semibold ${ratePerLitre > 0 ? 'text-blue-600' : 'text-red-500'}`}>
+                  {ratePerLitre > 0 ? `₹${ratePerLitre.toFixed(4)}/L` : '₹0 — enter Total Litres'}
+                </span>
+                {sourceForm.total_liters === 0 && readingsTotal > 0 && (
+                  <span className="text-xs text-amber-600 ml-2">(will auto-use {readingsTotal.toLocaleString()} L on save)</span>
+                )}
               </div>
               {!isLocked && (
                 <button
