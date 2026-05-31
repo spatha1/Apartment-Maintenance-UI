@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Building2, LayoutDashboard, Receipt, Droplets,
-  BarChart3, LogOut, User, Download, Settings2, Info, IndianRupee, PiggyBank,
+  BarChart3, LogOut, User, Download, Settings2, Info, IndianRupee, PiggyBank, ClipboardList,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
@@ -39,6 +39,7 @@ export default function Layout({ children, monthId }: Props) {
           { to: `/summary/${monthId}`, icon: BarChart3, label: 'Summary', end: false },
         ]
       : []),
+    { to: '/activity', icon: ClipboardList, label: 'Activity', end: false },
     { to: '/reports', icon: Download, label: 'Reports', end: false },
     { to: '/pool', icon: PiggyBank, label: 'Pool', end: false },
     { to: '/settings', icon: Settings2, label: 'Settings', end: false },

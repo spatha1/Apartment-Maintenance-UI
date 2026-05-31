@@ -86,6 +86,24 @@ export interface FlatsData {
   residential: string[]
   shops: string[]
   shop_charges: Record<string, number>
+  shop_names: Record<string, string>
+}
+
+export interface Activity {
+  id: number
+  title: string
+  description: string | null
+  amount: number | null
+  due_day: number | null
+  due_day_end: number | null
+  category: 'payment' | 'collection'
+  payment_mode: 'online' | 'cash' | 'any' | null
+  is_active: boolean
+  sort_order: number
+  completed: boolean
+  completed_date: string | null
+  completed_by: string | null
+  notes: string | null
 }
 
 export interface Notice {

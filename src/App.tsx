@@ -12,6 +12,7 @@ import Settings from './pages/Settings'
 import Reports from './pages/Reports'
 import Information from './pages/Information'
 import Pool from './pages/Pool'
+import Activity from './pages/Activity'
 
 function RootRedirect() {
   const { user, loading } = useAuth()
@@ -68,6 +69,11 @@ export default function App() {
           <Route path="/pool" element={
             <ProtectedRoute adminOnly>
               <Pool />
+            </ProtectedRoute>
+          } />
+          <Route path="/activity" element={
+            <ProtectedRoute adminOnly>
+              <Activity />
             </ProtectedRoute>
           } />
 
