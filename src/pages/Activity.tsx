@@ -356,7 +356,13 @@ function ActivityCard({ activity: a, isAdmin, toggling, onToggle, onEdit, onDele
           {a.amount != null && (
             <span className="flex items-center gap-1 text-xs font-semibold text-gray-700">
               <IndianRupee size={11} />₹{a.amount.toLocaleString()}
+              {a.auto_amount && (
+                <span className="text-xs text-blue-500 font-normal">(auto)</span>
+              )}
             </span>
+          )}
+          {a.amount == null && a.auto_amount && (
+            <span className="text-xs text-amber-600 italic">Amount not yet available</span>
           )}
           {due && (
             <span className="flex items-center gap-1 text-xs text-blue-600">

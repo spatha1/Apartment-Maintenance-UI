@@ -100,6 +100,7 @@ export interface Activity {
   payment_mode: 'online' | 'cash' | 'any' | null
   is_active: boolean
   sort_order: number
+  auto_amount: 'water_tanker' | 'saloon_s4' | null
   completed: boolean
   completed_date: string | null
   completed_by: string | null
