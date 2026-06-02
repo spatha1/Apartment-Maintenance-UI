@@ -19,11 +19,13 @@ export default function Settings() {
   const [mobileSaved, setMobileSaved] = useState(false)
 
   useEffect(() => {
-    api.get<{ qr_url: string; upi_mobile: string; logo_url?: string }>('/settings/qr').then(r => {
-      setQrUrl(r.qr_url)
-      setMobile(r.upi_mobile ?? '')
-      setLogoUrl(r.logo_url ?? '')
-    })
+    api.get<{ qr_url: string; upi_mobile: string; logo_url?: string }>('/settings/qr')
+      .then(r => {
+        setQrUrl(r.qr_url)
+        setMobile(r.upi_mobile ?? '')
+        setLogoUrl(r.logo_url ?? '')
+      })
+      .catch(err => setError(err instanceof Error ? err.message : 'Failed to load settings'))
   }, [])
 
   async function saveMobile() {
